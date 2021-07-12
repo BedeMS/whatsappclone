@@ -4,27 +4,49 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import SearchIcon from "@material-ui/icons/Search";
 import styled from "styled-components";
 import * as EmailValidator from "email-validator";
+import { auth, db } from "../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { useCollection } from "react-firebase-hooks/firestore";
 
 function Sidebar() {
+  const [user] = useAuthState(auth);
+  // this code goes through our chats collection and finds where
+  // the user email is mentioned in the users array (which is in the chat).
+  const userChatRef = db
+    .collection("chats")
+    .where("users", "array-contains", user.email);
+  const [chatsSnapshot] = useCollection(userChatRef);
+
   const createChat = () => {
     const input = prompt(
       "Please enter an email address for the user you want to chat with."
     );
 
-    if(!input) return null;
+    if (!input) return null;
 
     // Validate Email
-    if(EmailValidator.validate(input)) {
-      // if email is valid, push this into the DB
-      
+    if (EmailValidator.validate(input) && input !== user.email) {
+      // if email is valid, push this chat into the DB
+      // we're creating a collection of chats between the user and input.
+      db.collection("chats").add({
+        // we're saving the users email and the email from the input.
+        users: [user.email, input],
+      });
     }
-
-
   };
+
+  const chatExists = (recipeintEmail) => {
+    // ?. is optional chaining if it's undefined
+    chatsSnapshot?.docs.find(
+      (chat) =>
+        chat.data().users.find((user) => user === recipeintEmail)?.length > 0
+    );
+  };
+
   return (
     <Container>
       <Header>
-        <UserAvatar />
+        <UserAvatar onClick={() => auth.signOut()} />
         <IconsContainer>
           <IconButton>
             <ChatIcon />
@@ -38,7 +60,7 @@ function Sidebar() {
         <SearchIcon />
         <SearchInput placeholder="Search for Members" />
       </Search>
-      <SidebarButton onClick={createChat}>Start a new chat</SidebarButton>
+      <SidebarButton>Start a new chat</SidebarButton>
 
       {/* List of Chats */}
     </Container>
