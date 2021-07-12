@@ -3,8 +3,24 @@ import ChatIcon from "@material-ui/icons/Chat";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import SearchIcon from "@material-ui/icons/Search";
 import styled from "styled-components";
+import * as EmailValidator from "email-validator";
 
 function Sidebar() {
+  const createChat = () => {
+    const input = prompt(
+      "Please enter an email address for the user you want to chat with."
+    );
+
+    if(!input) return null;
+
+    // Validate Email
+    if(EmailValidator.validate(input)) {
+      // if email is valid, push this into the DB
+      
+    }
+
+
+  };
   return (
     <Container>
       <Header>
@@ -22,7 +38,7 @@ function Sidebar() {
         <SearchIcon />
         <SearchInput placeholder="Search for Members" />
       </Search>
-      <SidebarButton>Start a new chat</SidebarButton>
+      <SidebarButton onClick={createChat}>Start a new chat</SidebarButton>
 
       {/* List of Chats */}
     </Container>
@@ -53,7 +69,7 @@ const SearchInput = styled.input`
 const SidebarButton = styled(Button)`
   width: 100%;
 
-  ${'' /* &&& will incrase the priority of whatever is inside of it.
+  ${"" /* &&& will incrase the priority of whatever is inside of it.
     B/C we're using a materialUI Button, it has more specificity over
     our general styling. So in order to beat that, we can use &&& 
     from styled-component
