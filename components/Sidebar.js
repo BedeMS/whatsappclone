@@ -2,6 +2,7 @@ import { Avatar, IconButton, Button } from "@material-ui/core";
 import ChatIcon from "@material-ui/icons/Chat";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import SearchIcon from "@material-ui/icons/Search";
+import Chat from "../components/Chat";
 import styled from "styled-components";
 import * as EmailValidator from "email-validator";
 import { auth, db } from "../firebase";
@@ -15,6 +16,9 @@ function Sidebar() {
   const userChatRef = db
     .collection("chats")
     .where("users", "array-contains", user.email);
+  // chatsSnapshot is a real time listener that updates our userChatRef for
+  // the email in our chats db collection
+
   const [chatsSnapshot] = useCollection(userChatRef);
 
   const createChat = () => {
@@ -25,7 +29,12 @@ function Sidebar() {
     if (!input) return null;
 
     // Validate Email
-    if (EmailValidator.validate(input) && input !== user.email) {
+    // in this conditional, we don't want the input to match our users input and the chat doesn't already exist
+    if (
+      EmailValidator.validate(input) &&
+      !chatAlreadyExists(input) &&
+      input !== user.email
+    ) {
       // if email is valid, push this chat into the DB
       // we're creating a collection of chats between the user and input.
       db.collection("chats").add({
@@ -35,18 +44,20 @@ function Sidebar() {
     }
   };
 
-  const chatExists = (recipeintEmail) => {
-    // ?. is optional chaining if it's undefined
-    chatsSnapshot?.docs.find(
+  // recipeintEmail is our input email
+  const chatAlreadyExists = (recipeintEmail) =>
+    // we need a real time connection with our chats collection to see (chatsSnapshot)
+    // check if a chat w/ the recipeintEmail already exists
+    // ?. is optional chaining b/c it may be undefined
+    !!chatsSnapshot?.docs.find(
       (chat) =>
         chat.data().users.find((user) => user === recipeintEmail)?.length > 0
     );
-  };
 
   return (
     <Container>
       <Header>
-        <UserAvatar onClick={() => auth.signOut()} />
+          <UserAvatar onClick={() => auth.signOut()} src={user?.photoURL} />
         <IconsContainer>
           <IconButton>
             <ChatIcon />
@@ -60,9 +71,12 @@ function Sidebar() {
         <SearchIcon />
         <SearchInput placeholder="Search for Members" />
       </Search>
-      <SidebarButton>Start a new chat</SidebarButton>
+      <SidebarButton onClick={createChat}>Start a new chat</SidebarButton>
 
       {/* List of Chats */}
+      {chatsSnapshot?.docs.map((chat) => (
+        <Chat key={chat.id} id={chat.id} users={chat.data().users} />
+      ))}
     </Container>
   );
 }
