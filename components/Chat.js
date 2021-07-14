@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import styled from "styled-components";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
@@ -6,21 +7,27 @@ import { Avatar } from "@material-ui/core";
 import getRecipientEmail from "../utils/getRecipientEmail";
 
 function Chat({ id, users }) {
+  const router = useRouter();
   const [user] = useAuthState(auth);
   const [recipeintSnapShot] = useCollection(
     db.collection("users").where("email", "==", getRecipientEmail(users, user))
   );
 
+  const enterChat = () => {
+    // this will route our url to the resource specific page
+    router.push(`/chat/${id}`);
+  };
+
   // the reason for the ? is b/c these functions are async, so there's a good
   // chance we could get undefined
   const recipient = recipeintSnapShot?.docs?.[0]?.data();
-  console.log(recipient);
+
   //   console.log(recipeintSnapShot);
   const recipeintEmail = getRecipientEmail(users, user);
   //   console.log(recipeintEmail);
 
   return (
-    <Container>
+    <Container onClick={enterChat}>
       {recipient ? (
         <UserAvatar src={recipient?.photoURL} />
       ) : (
