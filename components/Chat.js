@@ -10,6 +10,7 @@ function Chat({ id, users }) {
   const router = useRouter();
   const [user] = useAuthState(auth);
   const [recipeintSnapShot] = useCollection(
+    // this is a query we need to provide to our useCollections.
     db.collection("users").where("email", "==", getRecipientEmail(users, user))
   );
 

@@ -9,16 +9,20 @@ import { auth, db } from "../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
 
+
+// We create components just like in react.
 function Sidebar() {
+  // provides us with the current user that's signed in.
   const [user] = useAuthState(auth);
+
   // this code goes through our chats collection and finds where
-  // the user email is mentioned in the users array (which is in the chat).
+  // the user email is mentioned in the users array (which is in every chats).
   const userChatRef = db
     .collection("chats")
     .where("users", "array-contains", user.email);
-  // chatsSnapshot is a real time listener that updates our userChatRef for
-  // the email in our chats db collection
 
+  // chatsSnapshot is a real time listener that updates for the emails 
+  // based on our userChatRef query in our chats db collection users array
   const [chatsSnapshot] = useCollection(userChatRef);
 
   const createChat = () => {
@@ -37,6 +41,7 @@ function Sidebar() {
     ) {
       // if email is valid, push this chat into the DB
       // we're creating a collection of chats between the user and input.
+      // add lets us create a new document in the chats collection.
       db.collection("chats").add({
         // we're saving the users email and the email from the input.
         users: [user.email, input],
@@ -49,8 +54,10 @@ function Sidebar() {
     // we need a real time connection with our chats collection to see (chatsSnapshot)
     // check if a chat w/ the recipeintEmail already exists
     // ?. is optional chaining b/c it may be undefined
+    // ***!! is b/c we need to convert this return statement into a boolean value
     !!chatsSnapshot?.docs.find(
       (chat) =>
+      //go through each chat doc's users array and check the emails inside
         chat.data().users.find((user) => user === recipeintEmail)?.length > 0
     );
 
