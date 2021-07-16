@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import styled from "styled-components";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "../firebase";
@@ -16,7 +16,7 @@ import Timeago from "timeago-react";
 
 function ChatScreen({ chat, messages }) {
   const [user] = useAuthState(auth);
-
+  const endOfMessagesRef = useRef(null);
   const [input, setInput] = useState("");
   const router = useRouter();
   // this will provide us with all the message we will have in a given chat
@@ -33,6 +33,14 @@ function ChatScreen({ chat, messages }) {
   const [recipientSnapshot] = useCollection(
     db.collection("users").where("email", "==", recipientEmail)
   );
+
+  // this allows us to scroll to the bottom of the element we want
+  const scrollToBottom = () => {
+    endOfMessagesRef.current.scrollIntoView({
+      behaviorr: "smooth",
+      block: "start",
+    });
+  };
 
   const showMessages = () => {
     // This is for the client side, once our client has recieved the messages.
@@ -77,6 +85,7 @@ function ChatScreen({ chat, messages }) {
     });
 
     setInput("");
+    scrollToBottom();
   };
 
   const recipient = recipientSnapshot?.docs?.[0]?.data();
@@ -116,7 +125,7 @@ function ChatScreen({ chat, messages }) {
       <MessageContainer>
         {/* show message */}
         {showMessages()}
-        <EndofMessage />
+        <EndofMessage ref={endOfMessagesRef} />
       </MessageContainer>
       <InputContainer>
         <InsertEmoticonIcon />
@@ -166,7 +175,9 @@ const MessageContainer = styled.div`
   min-height: 90vh;
 `;
 
-const EndofMessage = styled.div``;
+const EndofMessage = styled.div`
+  margin-bottom: 50px;
+`;
 
 const HeaderIcons = styled.div``;
 
