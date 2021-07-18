@@ -13,6 +13,7 @@ import { useCollection } from "react-firebase-hooks/firestore";
 // We create components just like in react.
 function Sidebar() {
   // provides us with the current user that's signed in.
+  // this is our authentication 
   const [user] = useAuthState(auth);
 
   // this code goes through our chats collection and finds where
@@ -21,7 +22,7 @@ function Sidebar() {
     .collection("chats")
     .where("users", "array-contains", user.email);
 
-  // chatsSnapshot is a real time listener that updates for the emails 
+  // chatsSnapshot is a real time "listener" that updates for the emails 
   // based on our userChatRef query in our chats db collection users array
   const [chatsSnapshot] = useCollection(userChatRef);
 
@@ -33,7 +34,7 @@ function Sidebar() {
     if (!input) return null;
 
     // Validate Email
-    // in this conditional, we don't want the input to match our users input and the chat doesn't already exist
+    // in this conditional, we don't want the input to match our users email and the chat doesn't already exist
     if (
       EmailValidator.validate(input) &&
       !chatAlreadyExists(input) &&
@@ -53,11 +54,13 @@ function Sidebar() {
   const chatAlreadyExists = (recipeintEmail) =>
     // we need a real time connection with our chats collection to see (chatsSnapshot)
     // check if a chat w/ the recipeintEmail already exists
-    // ?. is optional chaining b/c it may be undefined
+    // ?. is optional chaining for async functions b/c it may be undefined
     // ***!! is b/c we need to convert this return statement into a boolean value
     !!chatsSnapshot?.docs.find(
       (chat) =>
       //go through each chat doc's users array and check the emails inside
+      // ** to get in the document, we have to use data();
+      // find() gives us the first element that matches, return that arr;
         chat.data().users.find((user) => user === recipeintEmail)?.length > 0
     );
 

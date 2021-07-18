@@ -9,6 +9,7 @@ import getRecipientEmail from "../utils/getRecipientEmail";
 function Chat({ id, users }) {
   const router = useRouter();
   const [user] = useAuthState(auth);
+  // useCollection returns an array of documents that matches our query
   const [recipeintSnapShot] = useCollection(
     // this is a query we need to provide to our useCollections.
     db.collection("users").where("email", "==", getRecipientEmail(users, user))

@@ -15,9 +15,13 @@ import getRecipientEmail from "../utils/getRecipientEmail";
 import Timeago from "timeago-react";
 
 function ChatScreen({ chat, messages }) {
+  // get signed in user.
   const [user] = useAuthState(auth);
+
   const endOfMessagesRef = useRef(null);
+  // messages input
   const [input, setInput] = useState("");
+  // router from next.js
   const router = useRouter();
   // this will provide us with all the message we will have in a given chat
   const [messagesSnapshot] = useCollection(
