@@ -61,6 +61,8 @@ function ChatScreen({ chat, messages }) {
         />
       ));
     } else {
+      // this comes from the server. This is what we're displaying incase our 
+      // client side hasnt rendered anything yet.
       // we want to display the message right away so we can't wait for the client
       // to recieve the chat data.
       return JSON.parse(messages).map((msg) => (
@@ -80,7 +82,9 @@ function ChatScreen({ chat, messages }) {
       },
       { merge: true }
     );
-
+    
+    // This sends a message by adding the object to the correct chat (which
+    // we  query for) then go into the messages collection.
     db.collection("chats").doc(router.query.id).collection("messages").add({
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       message: input,

@@ -2,12 +2,13 @@ import moment from "moment";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase";
 import styled from "styled-components";
-// import Timestamp from "@material-ui/core"
 
+// we get each message from the server or the client. 
 function Message({ user, message }) {
   const [userLoggedIn] = useAuthState(auth);
 
   // this helps us determine is someone is a sender or a receiver
+  // this edits the color of the message background based on user
   const TypeOfMessage = user === userLoggedIn.email ? Sender : Reciever;
 
   return (
